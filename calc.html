@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Numerical Methods Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #007acc;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+    }
+    nav {
+      display: flex;
+      background: #005fa3;
+    }
+    nav button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: #005fa3;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    nav button:hover, nav button.active {
+      background: #004080;
+    }
+    main {
+      padding: 20px;
+    }
+    .calculator {
+      display: none;
+      background: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .calculator.active {
+      display: block;
+    }
+    .input-group {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button.calculate-btn {
+      background: #007acc;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button.calculate-btn:hover {
+      background: #005fa3;
+    }
+    .results {
+      margin-top: 20px;
+      padding: 15px;
+      background: #eaf4fc;
+      border-left: 4px solid #007acc;
+      border-radius: 4px;
+      word-wrap: break-word;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Numerical Methods Calculator</h1>
+  </header>
+  <nav>
+    <button id="rk4-tab" class="active" onclick="showCalculator('rk4')">Runge-Kutta</button>
+    <button id="interpolation-tab" onclick="showCalculator('interpolation')">Interpolation</button>
+    <button id="gauss-tab" onclick="showCalculator('gauss')">Gauss Elimination</button>
+    <button id="trapezoidal-tab" onclick="showCalculator('trapezoidal')">Trapezoidal Rule</button>
+    <button id="simpson-tab" onclick="showCalculator('simpson')">Simpson's Rule</button>
+  </nav>
+  <main>
+    <!-- RK4 -->
+    <div id="rk4" class="calculator active">
+      <h2>Fourth Order Runge-Kutta Method</h2>
+      <div class="input-group">
+        <label>Derivative function dy/dx (use x, y):</label>
+        <input type="text" id="rk4-func" placeholder="e.g., x + y">
+      </div>
+      <div class="input-group">
+        <label>Initial x (x0):</label>
+        <input type="number" id="rk4-x0" step="any">
+      </div>
+      <div class="input-group">
+        <label>Initial y (y0):</label>
+        <input type="number" id="rk4-y0" step="any">
+      </div>
+      <div class="input-group">
+        <label>Target x (xn):</label>
+        <input type="number" id="rk4-xn" step="any">
+      </div>
+      <div class="input-group">
+        <label>Step size (h):</label>
+        <input type="number" id="rk4-h" step="any">
+      </div>
+      <button class="calculate-btn" onclick="calculateRK4()">Calculate</button>
+      <div class="results" id="rk4-results"></div>
+    </div>
+    <!-- Interpolation -->
+    <div id="interpolation" class="calculator">
+      <h2>Newton’s Forward & Backward Difference Interpolation</h2>
+      <div class="input-group">
+        <label>Enter data points as x,y pairs (one per line):</label>
+        <textarea id="interp-points" rows="5" placeholder="e.g., 0,1\n1,2\n2,5"></textarea>
+      </div>
+      <div class="input-group">
+        <label>Value of x to interpolate:</label>
+        <input type="number" id="interp-x" step="any">
+      </div>
+      <button class="calculate-btn" onclick="calculateInterpolation()">Calculate</button>
+      <div class="results" id="interp-results"></div>
+    </div>
+    <!-- Gauss -->
+    <div id="gauss" class="calculator">
+      <h2>Gauss Elimination Method</h2>
+      <div class="input-group">
+        <label>Enter augmented matrix (rows separated by newline, values by space):</label>
+        <textarea id="gauss-matrix" rows="5" placeholder="e.g., 2 1 -1 8\n-3 -1 2 -11\n-2 1 2 -3"></textarea>
+      </div>
+      <button class="calculate-btn" onclick="calculateGauss()">Calculate</button>
+      <div class="results" id="gauss-results"></div>
+    </div>
+    <!-- Trapezoidal -->
+    <div id="trapezoidal" class="calculator">
+      <h2>Trapezoidal Rule</h2>
+      <div class="input-group">
+        <label>Function f(x):</label>
+        <input type="text" id="trap-func" placeholder="e.g., x*x">
+      </div>
+      <div class="input-group">
+        <label>Lower limit (a):</label>
+        <input type="number" id="trap-a" step="any">
+      </div>
+      <div class="input-group">
+        <label>Upper limit (b):</label>
+        <input type="number" id="trap-b" step="any">
+      </div>
+      <div class="input-group">
+        <label>Number of intervals (n):</label>
+        <input type="number" id="trap-n">
+      </div>
+      <button class="calculate-btn" onclick="calculateTrapezoidal()">Calculate</button>
+      <div class="results" id="trap-results"></div>
+    </div>
+    <!-- Simpson -->
+    <div id="simpson" class="calculator">
+      <h2>Simpson’s Rule</h2>
+      <div class="input-group">
+        <label>Function f(x):</label>
+        <input type="text" id="simp-func" placeholder="e.g., x*x">
+      </div>
+      <div class="input-group">
+        <label>Lower limit (a):</label>
+        <input type="number" id="simp-a" step="any">
+      </div>
+      <div class="input-group">
+        <label>Upper limit (b):</label>
+        <input type="number" id="simp-b" step="any">
+      </div>
+      <div class="input-group">
+        <label>Number of intervals (n, even):</label>
+        <input type="number" id="simp-n">
+      </div>
+      <button class="calculate-btn" onclick="calculateSimpson()">Calculate</button>
+      <div class="results" id="simp-results"></div>
+    </div>
+  </main>
+  <script>
+    function showCalculator(method) {
+      document.querySelectorAll('.calculator').forEach(div => div.classList.remove('active'));
+      document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(method).classList.add('active');
+      document.getElementById(`${method}-tab`).classList.add('active');
+    }
+
+    // Runge-Kutta
+    function calculateRK4() {
+      try {
+        const funcStr = document.getElementById('rk4-func').value;
+        const f = new Function('x','y', `return ${funcStr};`);
+        let x0 = parseFloat(document.getElementById('rk4-x0').value);
+        let y0 = parseFloat(document.getElementById('rk4-y0').value);
+        const xn = parseFloat(document.getElementById('rk4-xn').value);
+        const h = parseFloat(document.getElementById('rk4-h').value);
+        let steps = "";
+        while (x0 < xn - 1e-9) {
+          const k1 = h*f(x0, y0);
+          const k2 = h*f(x0+h/2, y0+k1/2);
+          const k3 = h*f(x0+h/2, y0+k2/2);
+          const k4 = h*f(x0+h, y0+k3);
+          y0 = y0 + (k1+2*k2+2*k3+k4)/6;
+          x0 = x0 + h;
+          steps += `x=${x0.toFixed(4)}, y=${y0.toFixed(6)}<br>`;
+        }
+        document.getElementById('rk4-results').innerHTML = `<p class="success"><strong>Final result: y(${xn}) = ${y0.toFixed(6)}</strong></p><p>${steps}</p>`;
+      } catch (error) {
+        document.getElementById('rk4-results').innerHTML = `<p class="error">Error: ${error.message}</p>`;
+      }
+    }
+
+    // Interpolation
+    function calculateInterpolation() {
+      try {
+        const raw = document.getElementById('interp-points').value.trim();
+        const lines = raw.split('\n');
+        const points = lines.map(line => {
+          const [x,y] = line.split(',').map(Number);
+          return {x,y};
+        });
+        const x = parseFloat(document.getElementById('interp-x').value);
+        let result = 0;
+        for (let i=0;i<points.length;i++) {
+          let term = points[i].y;
+          for (let j=0;j<points.length;j++) {
+            if (j!==i) term *= (x-points[j].x)/(points[i].x-points[j].x);
+          }
+          result += term;
+        }
+        document.getElementById('interp-results').innerHTML = `
+          <p class="success"><strong>Interpolated value at x = ${x}: ${result.toFixed(6)}</strong></p>
+          <p><strong>Data points used:</strong></p>
+          <ul>${points.map(p=>`<li>(${p.x}, ${p.y})</li>`).join('')}</ul>`;
+      } catch (error) {
+        document.getElementById('interp-results').innerHTML = `<p class="error">Error: ${error.message}</p>`;
+      }
+    }
+
+    // Gauss Elimination
+    function calculateGauss() {
+      try {
+        const lines = document.getElementById('gauss-matrix').value.trim().split('\n');
+        let A = lines.map(line => line.split(' ').map(Number));
+        const n = A.length;
+        for (let i=0;i<n;i++) {
+          let maxRow = i;
+          for (let k=i+1;k<n;k++) {
+            if (Math.abs(A[k][i])>Math.abs(A[maxRow][i])) maxRow = k;
+          }
+          [A[i],A[maxRow]]=[A[maxRow],A[i]];
+          for (let k=i+1;k<n;k++) {
+            const factor=A[k][i]/A[i][i];
+            for (let j=i;j<=n;j++) A[k][j]-=factor*A[i][j];
+          }
+        }
+        const x=new Array(n);
+        for (let i=n-1;i>=0;i--) {
+          x[i]=A[i][n]/A[i][i];
+          for (let k=i-1;k>=0;k--) A[k][n]-=A[k][i]*x[i];
+        }
+        document.getElementById('gauss-results').innerHTML = `<p class="success"><strong>Solution: [${x.map(v=>v.toFixed(6)).join(', ')}]</strong></p>`;
+      } catch (error) {
+        document.getElementById('gauss-results').innerHTML = `<p class="error">Error: ${error.message}</p>`;
+      }
+    }
+
+    // Trapezoidal
+    function calculateTrapezoidal() {
+      try {
+        const funcStr=document.getElementById('trap-func').value;
+        const f=new Function('x',`return ${funcStr};`);
+        const a=parseFloat(document.getElementById('trap-a').value);
+        const b=parseFloat(document.getElementById('trap-b').value);
+        const n=parseInt(document.getElementById('trap-n').value);
+        const h=(b-a)/n;
+        let sum=f(a)+f(b);
+        for (let i=1;i<n;i++) sum+=2*f(a+i*h);
+        const result=(h/2)*sum;
+        document.getElementById('trap-results').innerHTML = `<p class="success"><strong>Integral ≈ ${result.toFixed(6)}</strong></p>`;
+      } catch (error) {
+        document.getElementById('trap-results').innerHTML = `<p class="error">Error: ${error.message}</p>`;
+      }
+    }
+
+    // Simpson
+    function calculateSimpson() {
+      try {
+        const funcStr=document.getElementById('simp-func').value;
+        const f=new Function('x',`return ${funcStr};`);
+        const a=parseFloat(document.getElementById('simp-a').value);
+        const b=parseFloat(document.getElementById('simp-b').value);
+        const n=parseInt(document.getElementById('simp-n').value);
+        if (n%2!==0) throw new Error("n must be even");
+        const h=(b-a)/n;
+        let sum=f(a)+f(b);
+        for (let i=1;i<n;i++) {
+          sum+=(i%2===0?2:4)*f(a+i*h);
+        }
+        const result=(h/3)*sum;
+        document.getElementById('simp-results').innerHTML = `<p class="success"><strong>Integral ≈ ${result.toFixed(6)}</strong></p>`;
+      } catch (error) {
+        document.getElementById('simp-results').innerHTML = `<p class="error">Error: ${error.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
